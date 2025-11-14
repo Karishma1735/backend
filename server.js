@@ -9,8 +9,6 @@ const app = express()
 const port = 3000
 dotenv.config()
 app.use(cookieParser())
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
 
 const MONGODB_URI = "mongodb://localhost:27017"
