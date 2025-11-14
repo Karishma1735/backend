@@ -1,8 +1,8 @@
+import jwt from 'jsonwebtoken'
 import User from "../model/userForm.js"
 import bcrypt from "bcrypt"
 
-// CREATE
-export const submitForm =  async(req,res) => {
+export const submitForm =  async(req,res,next) => {
     const {name,email,password} = req.body || {}
 try {
     const saltRound = 10;
@@ -14,16 +14,24 @@ try {
 
     const newUser =new User({name,email,password:hashedPassword})
     await newUser.save()
-     res.status(200).send('Your message has been sent successfully!');
 
-} catch (error) {
-    res.status(500).send("Error saving user")
+    const token = jwt.sign({id:newUser._id , email:newUser._email},process.env.JWT_SECRET_KEY , { expiresIn: '1h' })
+     res.status(200).send({
+        message:'Your message has been sent successfully!',
+        token:token
+    });
+
+
+} catch (err) {
+    // res.status(500).send("Error saving user")
+    next(err);
     
 }
   
 }
 
-export const getAllUsers = async(req,res) =>{
+
+export const getAllUsers = async(req,res,next) =>{
     try {
         const users = await User.find({})
         res.status(200).json(users)
@@ -34,18 +42,21 @@ export const getAllUsers = async(req,res) =>{
     }
 }
 
-export const getUserById = async(req,res) =>{
+export const getUserById = async(req,res,next) =>{
     try {
         const user = await User.findById(req.params.id);
         if(!user) return res.status(404).send("User not found")
             res.status(200).send(user)
     } catch (error) {
-          res.status(500).send("Error fetching user");
+        //   res.status(500).send("Error fetching user");
+        next(err);
         
     }
 }
 
-export const updateUser =async(req,res) =>{
+
+
+export const updateUser =async(req,res,next) =>{
     
     try {
           const { name, email, password } = req.body;
@@ -66,16 +77,18 @@ export const updateUser =async(req,res) =>{
     if(!updateUser) return res.status(404).send("User not found")
        res.status(200).send( updatedUser)
     } catch (error) {
-        res.status(500).send("Error updating user")
+        // res.status(500).send("Error updating user")
+        next(err);
         
     }
 }   
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res,next) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
     if (!deletedUser) return res.status(404).send("User not found");
     res.status(200).send("User deleted successfully");
   } catch (error) {
-    res.status(500).send("Error deleting user");
+    // res.status(500).send("Error deleting user");
+    next(err);
   }
 };
