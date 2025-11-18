@@ -12,8 +12,8 @@ try {
         return res.status(400).send("all fields are required")
     }
 
-    const newUser =new User({name,email,password:hashedPassword})
-    await newUser.save()
+    const newUser = new User({name,email,password:hashedPassword})
+    await newUser.save();
 
     const token = jwt.sign({id:newUser._id , email:newUser._email},process.env.JWT_SECRET_KEY , { expiresIn: '1h' })
      res.status(200).send({
